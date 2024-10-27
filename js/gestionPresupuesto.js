@@ -4,7 +4,9 @@
 var presupuesto = 0;
 
 function actualizarPresupuesto(presupuesto) {
-  if ((typeof presupuesto === "number") & (presupuesto > 0)) {
+  if (isNaN(presupuesto) || presupuesto < 0) {
+    return -1;
+  } else if (presupuesto > 0) {
     return presupuesto;
   } else {
     return "Tu presupuesto actual es de 0 €";
@@ -12,7 +14,7 @@ function actualizarPresupuesto(presupuesto) {
 }
 
 function mostrarPresupuesto() {
-  // TODO
+  return `Tu presupuesto actual es de ${presupuesto} €`;
 }
 
 function CrearGasto() {
