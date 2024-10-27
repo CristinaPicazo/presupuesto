@@ -3,11 +3,12 @@
 // TODO: Variable global
 var presupuesto = 0;
 
-function actualizarPresupuesto(presupuesto) {
-  if (isNaN(presupuesto) || presupuesto < 0) {
+function actualizarPresupuesto(nuevoPresupuesto) {
+  if (isNaN(nuevoPresupuesto) || nuevoPresupuesto < 0) {
     return -1;
-  } else if (presupuesto > 0) {
-    return presupuesto;
+  } else if (nuevoPresupuesto > 0) {
+    presupuesto = nuevoPresupuesto;
+    return nuevoPresupuesto;
   } else {
     return "Tu presupuesto actual es de 0 €";
   }
