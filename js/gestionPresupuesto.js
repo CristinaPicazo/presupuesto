@@ -2,6 +2,8 @@
 
 // TODO: Variable global
 let presupuesto = 0;
+let gastos = [];
+let idGasto = 0;
 
 function actualizarPresupuesto(nuevoPresupuesto) {
   if (isNaN(nuevoPresupuesto) || nuevoPresupuesto < 0) {
@@ -18,11 +20,15 @@ function mostrarPresupuesto() {
   return `Tu presupuesto actual es de ${presupuesto} €`;
 }
 
-function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...NuevasEtiquetas) {
+function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
   this.valor = nuevoValor >= 0 ? nuevoValor : 0;
   this.descripcion = nuevadesc;
-  this.fecha = nuevaFecha;
-  this.etiquetas = NuevasEtiquetas.length > 0 ? [] : [...NuevasEtiquetas];
+
+  if (Date.parse(nuevaFecha)) {
+    this.fecha = Date.parse(nuevaFecha);
+  } else {
+    this.fecha = Date.parse(new Date());
+  }
 
   this.mostrarGasto = function () {
     return `Gasto correspondiente a ${this.descripcion} con valor ${this.valor} €`;
@@ -37,36 +43,72 @@ function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...NuevasEtiquetas) {
   };
 
   this.mostrarGastoCompleto = function () {
-    let listarEtiquetas = this.etiquetas.forEach((elemento) => {
-      `- ${elemento}\n`;
-    });
-    return `Gasto correspondiente a descripción del gasto con valor ${this.valor} €.
-    \n Fecha: ${this.fecha}\n
-    Etiquetas: ${listarEtiquetas}`;
+    let listarGasto = `Gasto correspondiente a ${this.descripcion} con valor ${
+      this.valor
+    } €.
+Fecha: ${new Date(this.fecha).toLocaleString()}
+Etiquetas:\n`;
+
+    for (let etiqueta of this.etiquetas) {
+      listarGasto += `- ${etiqueta}\n`;
+    }
+    return listarGasto;
   };
 
   this.actualizarFecha = function (nuevaFecha) {
-    if (nuevaFecha instanceof Date && !isNaN(d)) {
-      this.fecha = nuevaFecha;
+    if (Date.parse(nuevaFecha)) {
+      this.fecha = Date.parse(nuevaFecha);
     }
   };
 
-  this.anyadirEtiquetas = function (NuevasEtiquetas) {
-    this.etiquetas.push(...NuevasEtiquetas);
+  this.anyadirEtiquetas = function (...nuevasEtiquetas) {
+    nuevasEtiquetas.forEach((eti) => {
+      this.etiquetas.push(eti);
+      this.etiquetas = borrarDuplicados(this.etiquetas);
+    });
   };
 
   this.borrarEtiquetas = function (...borraEtiqueta) {
-    borraEtiqueta.forEach((etiqueta) => {
-      etiquetas.find(etiqueta).splice(etiqueta);
+    borraEtiqueta.forEach((eti) => {
+      let indice = this.etiquetas.indexOf(eti);
+      if (indice != -1) this.etiquetas.splice(indice, 1);
     });
   };
+
+  this.etiquetas = nuevasEtiquetas.length > 0 ? [] : [...nuevasEtiquetas];
+
+  this.anyadirEtiquetas(...nuevasEtiquetas);
 }
 
-function listarGastos() {}
-function calcularTotalGastos() {}
-function calcularBalance() {}
-function anyadirGasto() {}
-function borrarGasto() {}
+function listarGastos() {
+  return gastos;
+}
+
+function calcularTotalGastos() {
+  return gastos.map((gasto) => gasto.valor).reduce((a, b) => a + b);
+}
+
+function calcularBalance() {
+  return presupuesto - calcularTotalGastos();
+}
+
+function anyadirGasto(nuevoGasto) {
+  nuevoGasto.id = idGasto++;
+  gastos.push(nuevoGasto);
+}
+
+function borrarGasto(borraId) {
+  gastos.forEach((gasto) => {
+    if (gasto.id == borraId) {
+      let indice = gastos.indexOf(gasto);
+      gastos.splice(indice, 1);
+    }
+  });
+}
+
+function borrarDuplicados(arr) {
+  return [...new Set(arr)];
+}
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
