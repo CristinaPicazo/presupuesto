@@ -75,6 +75,18 @@ Etiquetas:\n`;
     });
   };
 
+  this.obtenerPeriodoAgrupacion = function (periodo) {
+    let fecha = new Date(this.fecha).toISOString();
+
+    if (periodo == "anyo") {
+      return fecha.substring(0,4);
+    } else if (periodo == "mes") {
+      return fecha.substring(0,7);
+    } else if (periodo == "dia") {
+      return fecha.substring(0,10);
+    }
+  };
+
   this.etiquetas = nuevasEtiquetas.length > 0 ? [] : [...nuevasEtiquetas];
 
   this.anyadirEtiquetas(...nuevasEtiquetas);
@@ -110,6 +122,17 @@ function borrarDuplicados(arr) {
   return [...new Set(arr)];
 }
 
+function anadirCerosFecha(numero) {
+  if (numero < 10) {
+    return `0${numero}`;
+  }
+  numero;
+}
+
+function filtrarGastos() {}
+
+function agruparGastos() {}
+
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
 // Si al obtener el código de una práctica se genera un conflicto, por favor incluye todo el código que aparece aquí debajo
@@ -122,4 +145,6 @@ export {
   calcularTotalGastos,
   calcularBalance,
   borrarGasto,
+  filtrarGastos,
+  agruparGastos,
 };
