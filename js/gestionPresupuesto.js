@@ -46,8 +46,8 @@ function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
     let listarGasto = `Gasto correspondiente a ${this.descripcion} con valor ${
       this.valor
     } €.
-Fecha: ${new Date(this.fecha).toLocaleString()}
-Etiquetas:\n`;
+      Fecha: ${new Date(this.fecha).toLocaleString()}
+      Etiquetas:\n`;
 
     for (let etiqueta of this.etiquetas) {
       listarGasto += `- ${etiqueta}\n`;
@@ -77,13 +77,12 @@ Etiquetas:\n`;
 
   this.obtenerPeriodoAgrupacion = function (periodo) {
     let fecha = new Date(this.fecha).toISOString();
-
     if (periodo == "anyo") {
-      return fecha.substring(0,4);
+      return fecha.substring(0, 4);
     } else if (periodo == "mes") {
-      return fecha.substring(0,7);
+      return fecha.substring(0, 7);
     } else if (periodo == "dia") {
-      return fecha.substring(0,10);
+      return fecha.substring(0, 10);
     }
   };
 
@@ -129,9 +128,73 @@ function anadirCerosFecha(numero) {
   numero;
 }
 
-function filtrarGastos() {}
+function filtrarGastos(objeto) {
+  return gastos.filter(function (contenidoGasto) {
+    let filtrosRequeridos = true;
 
-function agruparGastos() {}
+    if (objeto.fechaDesde) {
+      var fechaD = Date.parse(objeto.fechaDesde);
+      filtrosRequeridos = filtrosRequeridos && contenidoGasto.fecha >= fechaD;
+    }
+    if (objeto.fechaHasta) {
+      var fechaH = Date.parse(objeto.fechaHasta);
+      filtrosRequeridos = filtrosRequeridos && contenidoGasto.fecha <= fechaH;
+    }
+    if (objeto.valorMinimo) {
+      filtrosRequeridos =
+        filtrosRequeridos && contenidoGasto.valor >= objeto.valorMinimo;
+    }
+    if (objeto.valorMaximo) {
+      filtrosRequeridos =
+        filtrosRequeridos && contenidoGasto.valor <= objeto.valorMaximo;
+    }
+    if (objeto.descripcionContiene) {
+      filtrosRequeridos =
+        filtrosRequeridos &&
+        contenidoGasto.descripcion
+          .toLowerCase()
+          .includes(objeto.descripcionContiene.toLowerCase());
+    }
+    if (objeto.etiquetasTiene) {
+      let contieneEtiqueta = false;
+      for (let etiqueta of objeto.etiquetasTiene) {
+          if (contenidoGasto.etiquetas.indexOf(etiqueta) > -1) {
+            contieneEtiqueta = true;
+          }
+        }
+
+            // objeto.etiquetasTiene.forEach((etiqueta) => {
+            //   if (contenidoGasto.etiquetas.indexOf(etiqueta.toLowerCase() > -1)) {
+            //     contieneEtiqueta = true;
+            //   }})
+    
+      filtrosRequeridos = filtrosRequeridos && contieneEtiqueta;
+  }
+
+
+
+    return filtrosRequeridos;
+  });
+}
+
+function agruparGastos(periodo, etiquetas, fechaDesde, fechaHasta) {
+  let gastoAgrupado = filtrarGastos({
+    etiquetasTiene: etiquetas,
+    fechaDesde: fechaDesde,
+    fechaHasta: fechaHasta,
+  });
+
+  return gastoAgrupado.reduce((acumulador, gasto) => {
+    let periodoNuevo = gasto.obtenerPeriodoAgrupacion(periodo);
+
+    if (acumulador[periodoNuevo]) {
+      acumulador[periodoNuevo] = acumulador[periodoNuevo] + gasto.valor;
+    } else {
+      acumulador[periodoNuevo] = gasto.valor;
+    }
+    return acumulador;
+  }, {});
+}
 
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
