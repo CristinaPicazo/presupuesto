@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presupuesto Gastos</title>
+  </head>
+  <body>
+    <template name="plantillaGastos" id="plantillaGastos">
+      <div class="gasto">
+        <div class="gasto-descripcion"></div>
+        <div class="gasto-fecha"></div>
+        <div class="gasto-valor"></div>
+        <div class="gasto-etiquetas"></div>
+        <div>
+          <button class="gasto-editar-formulario" type="button">Editar</button>
+          <button class="gasto-borrar" type="button">Borrar</button>
+        </div>
+
+        <form name="formularioGasto" id="formularioGasto">
+          <div class="form-control">
+            <label for="descripcion">Descripcion</label>
+            <input name="descripcion" type="text" />
+          </div>
+          <div class="form-control">
+            <label for="valor">Valor</label>
+            <input name="valor" type="number" />
+          </div>
+          <div class="form-control">
+            <label for="fecha">Fecha</label>
+            <input name="fecha" type="date" />
+          </div>
+          <div class="form-control">
+            <label for="etiquetas">Etiquetas</label>
+            <input name="etiquetas" type="text" />
+          </div>
+          <button type="submit" class="botonEnviar">Enviar</button>
+          <button type="button" class="botonCancelar">Cancelar</button>
+        </form>
+      </div>
+    </template>
+
+    <div name="aplicacion" id="aplicacion">
+        <div id="totalGasto"></div>
+        <div id="creaFormulario"></div>
+        <div id="lista"></div>        
+    </div>
+
+
+    <script type="module" src="./js/gestionPresupuestoWeb.js"></script>
+  </body>
+</html>

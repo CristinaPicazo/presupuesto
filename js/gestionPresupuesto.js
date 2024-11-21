@@ -121,12 +121,12 @@ function borrarDuplicados(arr) {
   return [...new Set(arr)];
 }
 
-function anadirCerosFecha(numero) {
-  if (numero < 10) {
-    return `0${numero}`;
-  }
-  numero;
-}
+// function anadirCerosFecha(numero) {
+//   if (numero < 10) {
+//     return `0${numero}`;
+//   }
+//   numero;
+// }
 
 function filtrarGastos(objeto) {
   return gastos.filter(function (contenidoGasto) {
