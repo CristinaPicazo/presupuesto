@@ -46,8 +46,8 @@ function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
     let listarGasto = `Gasto correspondiente a ${this.descripcion} con valor ${
       this.valor
     } €.
-      Fecha: ${new Date(this.fecha).toLocaleString()}
-      Etiquetas:\n`;
+Fecha: ${new Date(this.fecha).toLocaleString()}
+Etiquetas:\n`;
 
     for (let etiqueta of this.etiquetas) {
       listarGasto += `- ${etiqueta}\n`;
@@ -77,6 +77,7 @@ function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
 
   this.obtenerPeriodoAgrupacion = function (periodo) {
     let fecha = new Date(this.fecha).toISOString();
+
     if (periodo == "anyo") {
       return fecha.substring(0, 4);
     } else if (periodo == "mes") {
@@ -87,27 +88,22 @@ function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
   };
 
   this.etiquetas = nuevasEtiquetas.length > 0 ? [] : [...nuevasEtiquetas];
-
   this.anyadirEtiquetas(...nuevasEtiquetas);
 }
 
 function listarGastos() {
   return gastos;
 }
-
 function calcularTotalGastos() {
   return gastos.map((gasto) => gasto.valor).reduce((a, b) => a + b);
 }
-
 function calcularBalance() {
   return presupuesto - calcularTotalGastos();
 }
-
 function anyadirGasto(nuevoGasto) {
   nuevoGasto.id = idGasto++;
   gastos.push(nuevoGasto);
 }
-
 function borrarGasto(borraId) {
   gastos.forEach((gasto) => {
     if (gasto.id == borraId) {
@@ -120,13 +116,6 @@ function borrarGasto(borraId) {
 function borrarDuplicados(arr) {
   return [...new Set(arr)];
 }
-
-// function anadirCerosFecha(numero) {
-//   if (numero < 10) {
-//     return `0${numero}`;
-//   }
-//   numero;
-// }
 
 function filtrarGastos(objeto) {
   return gastos.filter(function (contenidoGasto) {
@@ -157,21 +146,13 @@ function filtrarGastos(objeto) {
     }
     if (objeto.etiquetasTiene) {
       let contieneEtiqueta = false;
-      for (let etiqueta of objeto.etiquetasTiene) {
-          if (contenidoGasto.etiquetas.indexOf(etiqueta) > -1) {
-            contieneEtiqueta = true;
-          }
+      for (let etiqueta of contenidoGasto.etiquetas) {
+        if (objeto.etiquetasTiene.indexOf(etiqueta) > -1) {
+          contieneEtiqueta = true;
         }
-
-            // objeto.etiquetasTiene.forEach((etiqueta) => {
-            //   if (contenidoGasto.etiquetas.indexOf(etiqueta.toLowerCase() > -1)) {
-            //     contieneEtiqueta = true;
-            //   }})
-    
+      }
       filtrosRequeridos = filtrosRequeridos && contieneEtiqueta;
-  }
-
-
+    }
 
     return filtrosRequeridos;
   });
