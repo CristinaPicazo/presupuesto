@@ -127,8 +127,11 @@ button:disabled:hover {
     flex-wrap: wrap;
   }
 
-  .gasto > div,
-  .agrupacion-dato > div {
+  .gasto > div {
+    padding: 0.5em 0.7em;
+  }
+
+  .agrupacion-dato > span {
     padding: 0.5em 0.7em;
   }
 

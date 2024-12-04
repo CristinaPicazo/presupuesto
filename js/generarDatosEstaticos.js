@@ -62,8 +62,12 @@ gestionPreWeb.mostrarDatoEnId("balance-total", balance.toFixed(2));
 let listaGastosCompleto = gestionPre.listarGastos();
 gestionPreWeb.mostrarGastoWeb("listado-gastos-completo", listaGastosCompleto);
 
-let sep21 = new Date("2021-09-01").toLocaleString();
-let gastosFiltrados = gestionPre.filtrarGastos({ fechaDesde: sep21 });
+let desdeSep21 = new Date("2021-09-01").toISOString().substr(0, 10);
+let hastaSep21 = new Date("2021-09-30").toISOString().substr(0, 10);
+let gastosFiltrados = gestionPre.filtrarGastos({
+  fechaDesde: desdeSep21,
+  fechaHasta: hastaSep21,
+});
 gestionPreWeb.mostrarGastoWeb("listado-gastos-filtrado-1", gastosFiltrados);
 
 let gastos50 = gestionPre.filtrarGastos({ valorMinimo: 50 });

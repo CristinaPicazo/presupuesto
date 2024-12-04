@@ -31,7 +31,6 @@ function mostrarGastoWeb(idElemento, gastos) {
     gasto_etiquetas.setAttribute("class", "gasto-etiquetas");
 
     gasto.etiquetas.forEach((etiquetas) => {
-      console.log("etiquetas", etiquetas);
       let gasto_etiquetas_etiqueta = document.createElement("span");
       gasto_etiquetas_etiqueta.textContent = etiquetas;
       gasto_etiquetas_etiqueta.setAttribute(
@@ -45,6 +44,13 @@ function mostrarGastoWeb(idElemento, gastos) {
 }
 
 function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
+  let periodoH1 = periodo;
+  if (periodo == "dia") {
+    periodoH1 = "día";
+  }
+  if (periodo == "anyo") {
+    periodoH1 = "año";
+  }
   let idHTML = document.getElementById(idElemento);
 
   let div_agrupacion = document.createElement("div");
@@ -52,19 +58,19 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
   idHTML.appendChild(div_agrupacion);
 
   let cabecera = document.createElement("h1");
-  cabecera.textContent = `Gastos agrupados por ${periodo}`;
+  cabecera.textContent = `Gastos agrupados por ${periodoH1}`;
   div_agrupacion.appendChild(cabecera);
 
   Object.entries(agrup).map(([key, value]) => {
     let agrupacion_dato = document.createElement("div");
     agrupacion_dato.setAttribute("class", "agrupacion-dato");
 
-    let agrupacion_dato_clave = document.createElement("div");
+    let agrupacion_dato_clave = document.createElement("span");
     agrupacion_dato_clave.setAttribute("class", "agrupacion-dato-clave");
     agrupacion_dato_clave.textContent = key;
     agrupacion_dato.appendChild(agrupacion_dato_clave);
 
-    let agrupacion_dato_valor = document.createElement("div");
+    let agrupacion_dato_valor = document.createElement("span");
     agrupacion_dato_valor.setAttribute("class", "agrupacion-dato-valor");
     agrupacion_dato_valor.textContent = value.toFixed(2);
     agrupacion_dato.appendChild(agrupacion_dato_valor);
