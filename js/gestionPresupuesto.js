@@ -23,7 +23,7 @@ function mostrarPresupuesto() {
 function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
   this.valor = nuevoValor >= 0 ? nuevoValor : 0;
   this.descripcion = nuevadesc;
-
+  
   if (Date.parse(nuevaFecha)) {
     this.fecha = Date.parse(nuevaFecha);
   } else {
