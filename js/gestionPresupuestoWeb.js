@@ -192,6 +192,7 @@ let BorrarEtiquetasHandle = {
   },
 };
 
+// funcion añadir gasto a traves del fomulario template
 function nuevoGastoWebFormulario(evento) {
   // copia del formulario y lo añade a la pagina
   let plantillaFormulario = document
@@ -302,11 +303,6 @@ let EditarHandleFormulario = {
       this.gasto.actualizarDescripcion(formulario.descripcion.value);
       this.gasto.actualizarFecha(formulario.fecha.value);
       this.gasto.actualizarValor(parseFloat(formulario.valor.value));
-      // let etiquetas = formulario.etiquetas.value.split(" ");
-      // console.log('etiquetas nuevas', etiquetas)
-      // console.log('etiquetas viejas', this.gasto.eti)
-      // this.gasto.borrarEtiquetas(this.gasto.etiquetas);
-      // this.gasto.anyadirEtiquetas(etiquetas);
       repintar();
     });
 
@@ -320,4 +316,80 @@ let EditarHandleFormulario = {
     });
   },
 };
+
+// let filtrarGastosWeb = {
+//   handleEvent: function (evento) {
+//     evento.preventDefault();
+//     document.getElementById("formulario-filtrado");
+//   },
+// };
+function filtrarGastosWeb(evento) {
+  let formulario = evento.target;
+  let prueba = {}
+
+  // Datos del formulario
+  let descripcionContiene = formulario.querySelector(
+    "#formulario-filtrado-descripcion"
+  ).value;
+  if (descripcionContiene>0){
+    prueba = prueba.descripcionContiene=descripcionContiene;
+  }
+  console.log('prueba', prueba)
+
+  let valorMinimo = parseFloat(formulario.querySelector(
+    "#formulario-filtrado-valor-minimo"
+  ).value);
+  let valorMaximo = parseFloat(formulario.querySelector(
+    "#formulario-filtrado-valor-maximo"
+  ).value);
+  let fechaDesde = formulario.querySelector(
+    "#formulario-filtrado-fecha-desde"
+  ).value;
+  let fechaHasta = formulario.querySelector(
+    "#formulario-filtrado-fecha-hasta"
+  ).value;
+  let etiquetasTiene = formulario.querySelector(
+    "#formulario-filtrado-etiquetas-tiene"
+  ).value;
+
+
+  
+  // Si tiene etiquetas se llama a transformarListadoEtiquetas
+  if (etiquetasTiene.length > 0) {
+    etiquetasTiene = gestionPre.transformarListadoEtiquetas(etiquetasTiene);
+    console.log('etiquetasTiene dentro de if 354: ', etiquetasTiene)
+  }
+  
+ 
+  if (fechaHasta.length>0){
+    prueba.push
+  }
+  // Creamos el gasto para filtrarlo
+  let gastoAgrupado = {
+    fechaDesde,
+    fechaHasta,
+    valorMinimo,
+    valorMaximo,
+    descripcionContiene,
+    etiquetasTiene,
+  };
+
+  // Filtramos el gasto con el objeto creado
+  let gastosFiltrados = gestionPre.filtrarGastos(gastoAgrupado);
+  console.log('gastosFiltrados', gastosFiltrados)
+  
+  // Vaciamos los gastos
+  document.getElementById("listado-gastos-completo").innerHTML = "";
+  
+  // Actulizamos la lista de gastos
+  mostrarGastoWeb("listado-gastos-completo",gastosFiltrados);
+}
+
+document
+  .getElementById("formulario-filtrado")
+  .addEventListener("submit", (evento) => {
+    evento.preventDefault();
+    filtrarGastosWeb(evento);
+  });
+
 export { mostrarDatoEnId, mostrarGastoWeb, mostrarGastosAgrupadosWeb };

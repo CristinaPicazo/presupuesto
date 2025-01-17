@@ -23,7 +23,7 @@ function mostrarPresupuesto() {
 function CrearGasto(nuevadesc, nuevoValor, nuevaFecha, ...nuevasEtiquetas) {
   this.valor = nuevoValor >= 0 ? nuevoValor : 0;
   this.descripcion = nuevadesc;
-  
+
   if (Date.parse(nuevaFecha)) {
     this.fecha = Date.parse(nuevaFecha);
   } else {
@@ -177,6 +177,15 @@ function agruparGastos(periodo, etiquetas, fechaDesde, fechaHasta) {
   }, {});
 }
 
+function transformarListadoEtiquetas(eti) {
+  // Camiamos espacios en blanco y separadores por comas
+  let etiquetas = eti.replace(/\s|[".:;"]/g, ",").split(",");
+  // Quitamos las etiquetas vacías que se han creado por los espacios en blanco
+  etiquetas = etiquetas.filter((etiqueta) => etiqueta !== "");
+
+  return etiquetas;
+}
+
 // NO MODIFICAR A PARTIR DE AQUÍ: exportación de funciones y objetos creados para poder ejecutar los tests.
 // Las funciones y objetos deben tener los nombres que se indican en el enunciado
 // Si al obtener el código de una práctica se genera un conflicto, por favor incluye todo el código que aparece aquí debajo
@@ -191,4 +200,5 @@ export {
   borrarGasto,
   filtrarGastos,
   agruparGastos,
+  transformarListadoEtiquetas,
 };
