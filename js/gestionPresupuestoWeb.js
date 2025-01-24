@@ -64,6 +64,16 @@ function mostrarGastoWeb(idElemento, gastos) {
     botonBorrar.innerHTML = "Borrar";
     estrucuturaGasto.appendChild(botonBorrar);
 
+    // Nuevo boton para borrar de la aplicacion
+    let botonBorrarAPI = document.createElement("button");
+    botonBorrarAPI.setAttribute("type", "button");
+    botonBorrarAPI.setAttribute("class", "gasto-borrar-api");
+    let handleBorrarAPI = Object.create(BorrarHandleAPI);
+    handleBorrarAPI.gasto = gasto;
+    botonBorrarAPI.addEventListener("click", handleBorrarAPI);
+    botonBorrarAPI.innerHTML = "Borrar (API)";
+    estrucuturaGasto.appendChild(botonBorrarAPI);
+
     let botonEditarFormulario = document.createElement("button");
     botonEditarFormulario.setAttribute("type", "button");
     botonEditarFormulario.setAttribute("class", "gasto-editar-formulario");
@@ -113,9 +123,8 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
 
 // Crear una función repintar para actualizar la página
 function repintar() {
-  
   // Si no tiene gastos lo limpiamos todo
-  if (gestionPre.listarGastos() == ""){
+  if (gestionPre.listarGastos() == "") {
     document.getElementById("listado-gastos-completo").innerHTML = "";
     document.getElementById("listado-gastos-filtrado-1").innerHTML = "";
     document.getElementById("listado-gastos-filtrado-2").innerHTML = "";
@@ -127,7 +136,7 @@ function repintar() {
     // mostrarDatoEnId("presupuesto",gestionPre.)
     // return;
   }
-  mostrarDatoEnId("presupuesto", gestionPre.mostrarPresupuesto());  
+  mostrarDatoEnId("presupuesto", gestionPre.mostrarPresupuesto());
   mostrarDatoEnId(
     "gastos-totales",
     gestionPre.calcularTotalGastos().toFixed(2)
@@ -425,14 +434,84 @@ function cargarGastosWeb() {
   if (GestorGastosDWEC == null) {
     let gastosVacio = new Array();
     gestionPre.cargarGastos(gastosVacio);
-  }else{
-    gestionPre.cargarGastos(GestorGastosDWEC)
-  }  
+  } else {
+    gestionPre.cargarGastos(GestorGastosDWEC);
+  }
   repintar();
 }
 document.getElementById("cargar-gastos").addEventListener("click", (evento) => {
   evento.preventDefault();
   cargarGastosWeb();
 });
+
+// Obtenemos el nombre de usuario para hacer la carga
+let usuario = document.getElementById("nombre_usuario").value;
+if (usuario == "") usuario = "CristinaPicazo";
+// Cargar gastos desde la aplicacion
+function cargarGastosApi() {
+  fetch(
+    `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`
+  )
+    .then((response) => response.json())
+    .then((datos) => console.log("datos", datos))
+    .catch((error) => console.log("Se ha producido un error: ", error));
+
+  // Enviamos los gastos y repintamos
+  // gestionPre.cargarGastos(gastos);
+  // repintar();
+}
+
+document
+  .getElementById("cargar-gastos-api")
+  .addEventListener("click", (evento) => {
+    evento.preventDefault();
+    cargarGastosApi();
+  });
+
+// Función BorrarHandle desde la API
+let BorrarHandleAPI = {
+  handleEvent: function () {
+    fetch(
+      `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}/${this.gasto.id}`,
+      {
+        method: "DELETE",
+      }
+    ).then(console.log("borrado correctamente"));
+  },
+};
+
+// guardar gastos en la aplicacion
+// function cargarGastosApi() {
+//   fetch(
+//     `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`
+//   )
+//     .then((response) => response.json())
+//     .then((datos) => console.log("datos", datos))
+//     .catch((error) => console.log("Se ha producido un error: ", error));
+
+//   // Enviamos los gastos y repintamos
+//   gestionPre.cargarGastos(gastos);
+//   repintar();
+// }
+
+document
+  .getElementById("gasto-enviar-api") ///es una clase
+  .addEventListener("click", (evento) => {
+    evento.preventDefault();
+
+    // Obtiene todos los gastos
+    let gastos = gestionPre.listarGastos();
+
+    fetch(
+      `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`,
+      {
+        method: " POST",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify(gastos),
+      }
+    ).then(cargarGastosApi());
+  });
 
 export { mostrarDatoEnId, mostrarGastoWeb, mostrarGastosAgrupadosWeb };
