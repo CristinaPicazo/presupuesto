@@ -124,6 +124,7 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
 // Crear una función repintar para actualizar la página
 function repintar() {
   // Si no tiene gastos lo limpiamos todo
+  console.log('gestionPre.listarGastos()', gestionPre.listarGastos())
   if (gestionPre.listarGastos() == "") {
     document.getElementById("listado-gastos-completo").innerHTML = "";
     document.getElementById("listado-gastos-filtrado-1").innerHTML = "";
@@ -133,9 +134,8 @@ function repintar() {
     document.getElementById("agrupacion-dia").innerHTML = "";
     document.getElementById("agrupacion-mes").innerHTML = "";
     document.getElementById("agrupacion-anyo").innerHTML = "";
-    // mostrarDatoEnId("presupuesto",gestionPre.)
-    // return;
   }
+
   mostrarDatoEnId("presupuesto", gestionPre.mostrarPresupuesto());
   mostrarDatoEnId(
     "gastos-totales",
@@ -282,27 +282,39 @@ document
   });
 
 let EditarHandleFormulario = {
-  handleEvent: function () {
+  handleEvent: function (evento) {
     // copia del formulario y lo añade a la pagina en cada botón
     let plantillaFormulario = document
       .getElementById("formulario-template")
       .content.cloneNode(true);
 
-    let gastoEditar = document.getElementsByClassName("gasto");
-    for (let i = 0; i < gastoEditar.length; i++) {
-      gastoEditar[i].appendChild(plantillaFormulario);
-    }
+    // let gastoEditar = document.getElementsByClassName("gasto");
+    // console.log('gastoEditar', typeof(gastoEditar))
+    // for (let i = 0; i < gastoEditar.length; i++) {
+    //   gastoEditar[i].appendChild(plantillaFormulario);
+    // }
 
-    // desactivamos el botón para añadir más
-    let botonAnadir = event.target;
+    evento.target.parentElement.appendChild(plantillaFormulario);
+
+    // // desactivamos el botón para añadir más
+    // console.log("boton",gastoEditar.parentNode);
+
+    // let botonAnadir = document.querySelector(".gasto-editar-formulario");
+    // botonAnadir.disabled = true;
+    // console.log('botonAnadir', botonAnadir)
+    let botonAnadir = evento.target;
     botonAnadir.disabled = true;
-    // event.target.disabled = true;
+    evento.target.disabled = true;
 
-    let formulario = document.querySelector(".gasto form");
+    let formulario = evento.target.parentElement;
+    // let formulario = document.querySelectorAll(".gasto form");
 
-    formulario.descripcion.value = this.gasto.descripcion;
-    formulario.valor.value = this.gasto.valor;
-    formulario.etiquetas.value = this.gasto.etiquetas;
+    document.querySelector("#descripcion").value = this.gasto.descripcion
+    document.querySelector("#valor").value = this.gasto.valor
+    document.querySelector("#etiquetas").value = this.gasto.etiquetas
+    // formulario.descripcion.innerHTML = this.gasto.descripcion;
+    // formulario.valor.value = this.gasto.valor;
+    // formulario.etiquetas.value = this.gasto.etiquetas;
 
     let dia = new Date(this.gasto.fecha).getDay();
     let mes = new Date(this.gasto.fecha).getMonth();
@@ -314,11 +326,12 @@ let EditarHandleFormulario = {
       mes = "0" + mes;
     }
     let fecha = `${anyo}-${mes}-${dia}`;
-    formulario.fecha.value = fecha;
+    document.querySelector("#fecha").value = fecha;
+    // formulario.fecha.value = fecha;
 
     // al pinchar submit
 
-    this.gasto.id;
+    // this.gasto.id;
     formulario.addEventListener("submit", (evento) => {
       evento.preventDefault();
       document.getElementById("anyadirgasto-formulario").disabled = false;
@@ -336,6 +349,30 @@ let EditarHandleFormulario = {
       evento.preventDefault();
       botonAnadir.disabled = false;
       formulario.parentElement.removeChild(formulario);
+    });
+
+    // nuevo botón para enviar el gasto a la aplicacion
+    let gastoEnviarAPI = formulario.querySelector(".gasto-enviar-api");
+    gastoEnviarAPI.addEventListener("click", (evento) => {
+      evento.preventDefault();
+ 
+      let descripcion = document.querySelector("#descripcion").value;
+      let valor = parseFloat(document.querySelector("#valor").value);
+      let fecha = document.querySelector("#fecha").value;
+      let etiquetas = document.querySelector("#etiquetas").value.split(" ");
+  
+      let nuevoGasto = new gestionPre.CrearGasto(
+        descripcion,
+        valor,
+        fecha,
+        ...etiquetas
+      );
+
+      fetch(`${aplicacion}/${usuario}/${this.gasto.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoGasto),
+      }).then(() => cargarGastosApi());
     });
   },
 };
@@ -445,20 +482,17 @@ document.getElementById("cargar-gastos").addEventListener("click", (evento) => {
 });
 
 // Obtenemos el nombre de usuario para hacer la carga
+const aplicacion =
+  "https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest";
 let usuario = document.getElementById("nombre_usuario").value;
 if (usuario == "") usuario = "CristinaPicazo";
 // Cargar gastos desde la aplicacion
 function cargarGastosApi() {
-  fetch(
-    `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`
-  )
+  fetch(`${aplicacion}/${usuario}`)
     .then((response) => response.json())
-    .then((datos) => console.log("datos", datos))
-    .catch((error) => console.log("Se ha producido un error: ", error));
-
-  // Enviamos los gastos y repintamos
-  // gestionPre.cargarGastos(gastos);
-  // repintar();
+    .then((gastosAPI) => gestionPre.cargarGastos(gastosAPI))
+    .then(() => repintar())
+    .catch((error) => alert("Se ha producido un error: ", error));
 }
 
 document
@@ -471,47 +505,10 @@ document
 // Función BorrarHandle desde la API
 let BorrarHandleAPI = {
   handleEvent: function () {
-    fetch(
-      `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}/${this.gasto.id}`,
-      {
-        method: "DELETE",
-      }
-    ).then(console.log("borrado correctamente"));
+    fetch(`${aplicacion}/${usuario}/${this.gasto.id}`, {
+      method: "DELETE",
+    }).then(() => cargarGastosApi())
   },
 };
-
-// guardar gastos en la aplicacion
-// function cargarGastosApi() {
-//   fetch(
-//     `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`
-//   )
-//     .then((response) => response.json())
-//     .then((datos) => console.log("datos", datos))
-//     .catch((error) => console.log("Se ha producido un error: ", error));
-
-//   // Enviamos los gastos y repintamos
-//   gestionPre.cargarGastos(gastos);
-//   repintar();
-// }
-
-document
-  .getElementById("gasto-enviar-api") ///es una clase
-  .addEventListener("click", (evento) => {
-    evento.preventDefault();
-
-    // Obtiene todos los gastos
-    let gastos = gestionPre.listarGastos();
-
-    fetch(
-      `https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest/${usuario}`,
-      {
-        method: " POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify(gastos),
-      }
-    ).then(cargarGastosApi());
-  });
 
 export { mostrarDatoEnId, mostrarGastoWeb, mostrarGastosAgrupadosWeb };
