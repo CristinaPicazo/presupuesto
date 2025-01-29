@@ -103,6 +103,7 @@ function calcularTotalGastos() {
 function calcularBalance() {
   return presupuesto - calcularTotalGastos();
 }
+
 function anyadirGasto(nuevoGasto) {
   nuevoGasto.id = idGasto++;
   gastos.push(nuevoGasto);

@@ -124,7 +124,7 @@ function mostrarGastosAgrupadosWeb(idElemento, agrup, periodo) {
 // Crear una función repintar para actualizar la página
 function repintar() {
   // Si no tiene gastos lo limpiamos todo
-  console.log('gestionPre.listarGastos()', gestionPre.listarGastos())
+  console.log("gestionPre.listarGastos()", gestionPre.listarGastos());
   if (gestionPre.listarGastos() == "") {
     document.getElementById("listado-gastos-completo").innerHTML = "";
     document.getElementById("listado-gastos-filtrado-1").innerHTML = "";
@@ -217,6 +217,7 @@ let BorrarEtiquetasHandle = {
 
 // funcion añadir gasto a traves del fomulario template
 function nuevoGastoWebFormulario(evento) {
+  console.log("evento 220", evento);
   // copia del formulario y lo añade a la pagina
   let plantillaFormulario = document
     .getElementById("formulario-template")
@@ -228,12 +229,14 @@ function nuevoGastoWebFormulario(evento) {
   // desactivamos el botón para añadir más
   document.getElementById("anyadirgasto-formulario").disabled = true;
 
-  // seleccionamos el formulario y añadimos el compra
   let formulario = document.querySelector("form");
+
+  // enviar el gasto a localstoreage
   formulario.addEventListener("submit", (evento) => {
     evento.preventDefault();
     document.getElementById("anyadirgasto-formulario").disabled = false;
 
+    // obtenemos los datos nuevos
     let descripcion = evento.target.elements.descripcion.value;
     let valor = parseFloat(evento.target.elements.valor.value);
     let fecha = evento.target.elements.fecha.value;
@@ -245,6 +248,7 @@ function nuevoGastoWebFormulario(evento) {
       fecha,
       ...etiquetas
     );
+
     gestionPre.anyadirGasto(nuevoGasto);
     repintar();
 
@@ -261,6 +265,41 @@ function nuevoGastoWebFormulario(evento) {
     document.getElementById("anyadirgasto-formulario")
   );
   botonCancelar.addEventListener("click", manejadorCancelar);
+
+  // boton Enviar (API) para nuevos gastos en la aplicacion
+  document
+    .querySelector(".gasto-enviar-api")
+    .addEventListener("click", (evento) => {
+      evento.preventDefault();
+
+      // obtenemos los datos
+      let descripcion = document.querySelector("#descripcion").value;
+      let valor = parseFloat(document.querySelector("#valor").value);
+      let fecha = document.querySelector("#fecha").value;
+      let etiquetas = document.querySelector("#etiquetas").value.split(" ");
+
+      let nuevoGasto = new gestionPre.CrearGasto(
+        descripcion,
+        valor,
+        fecha,
+        ...etiquetas
+      );
+
+      let gastoId = Math.floor(Math.random() * 1000000);
+      nuevoGasto.gastoId = gastoId;
+
+      // se envian los datos
+      fetch(`${aplicacion}/${usuario}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevoGasto),
+      })
+        .then(() => cargarGastosApi())
+        .catch((err) => console.log("Error: ", err));
+
+      document.getElementById("anyadirgasto-formulario").disabled = false;
+      document.getElementById("controlesprincipales").removeChild(formulario);
+    });
 }
 
 function CancelarHandleFormulario(formulario, botonAnyadir) {
@@ -288,34 +327,18 @@ let EditarHandleFormulario = {
       .getElementById("formulario-template")
       .content.cloneNode(true);
 
-    // let gastoEditar = document.getElementsByClassName("gasto");
-    // console.log('gastoEditar', typeof(gastoEditar))
-    // for (let i = 0; i < gastoEditar.length; i++) {
-    //   gastoEditar[i].appendChild(plantillaFormulario);
-    // }
-
+    // añadimos la copia del furmulario
     evento.target.parentElement.appendChild(plantillaFormulario);
 
-    // // desactivamos el botón para añadir más
-    // console.log("boton",gastoEditar.parentNode);
-
-    // let botonAnadir = document.querySelector(".gasto-editar-formulario");
-    // botonAnadir.disabled = true;
-    // console.log('botonAnadir', botonAnadir)
+    // bloqueamos el boton editar (formulario)
     let botonAnadir = evento.target;
     botonAnadir.disabled = true;
-    evento.target.disabled = true;
 
-    let formulario = evento.target.parentElement;
-    // let formulario = document.querySelectorAll(".gasto form");
-
-    document.querySelector("#descripcion").value = this.gasto.descripcion
-    document.querySelector("#valor").value = this.gasto.valor
-    document.querySelector("#etiquetas").value = this.gasto.etiquetas
-    // formulario.descripcion.innerHTML = this.gasto.descripcion;
-    // formulario.valor.value = this.gasto.valor;
-    // formulario.etiquetas.value = this.gasto.etiquetas;
-
+    // obtenemos los valores del gasto para ponerlos en el input del formulario
+    document.querySelector("#descripcion").value = this.gasto.descripcion;
+    document.querySelector("#valor").value = this.gasto.valor;
+    document.querySelector("#etiquetas").value = this.gasto.etiquetas;
+    // convertimos la fecha
     let dia = new Date(this.gasto.fecha).getDay();
     let mes = new Date(this.gasto.fecha).getMonth();
     let anyo = new Date(this.gasto.fecha).getFullYear();
@@ -327,18 +350,20 @@ let EditarHandleFormulario = {
     }
     let fecha = `${anyo}-${mes}-${dia}`;
     document.querySelector("#fecha").value = fecha;
-    // formulario.fecha.value = fecha;
 
-    // al pinchar submit
+    // obtenemos el formulario para ver sus valores
+    let formulario = document.querySelector(".gasto form");
 
-    // this.gasto.id;
+    // boton enviar dentro del formulario en cada gasto
     formulario.addEventListener("submit", (evento) => {
       evento.preventDefault();
       document.getElementById("anyadirgasto-formulario").disabled = false;
 
+      // obtenemos los valores del formulario por si se han modificado
       this.gasto.actualizarDescripcion(formulario.descripcion.value);
       this.gasto.actualizarFecha(formulario.fecha.value);
       this.gasto.actualizarValor(parseFloat(formulario.valor.value));
+      // pintamos de nuevo la pagina
       repintar();
     });
 
@@ -351,16 +376,16 @@ let EditarHandleFormulario = {
       formulario.parentElement.removeChild(formulario);
     });
 
-    // nuevo botón para enviar el gasto a la aplicacion
+    // nuevo botón para enviar el gasto a la aplicacion enviar (API) dentro del editar (formulario)
     let gastoEnviarAPI = formulario.querySelector(".gasto-enviar-api");
     gastoEnviarAPI.addEventListener("click", (evento) => {
       evento.preventDefault();
- 
+
       let descripcion = document.querySelector("#descripcion").value;
       let valor = parseFloat(document.querySelector("#valor").value);
       let fecha = document.querySelector("#fecha").value;
       let etiquetas = document.querySelector("#etiquetas").value.split(" ");
-  
+
       let nuevoGasto = new gestionPre.CrearGasto(
         descripcion,
         valor,
@@ -368,11 +393,14 @@ let EditarHandleFormulario = {
         ...etiquetas
       );
 
-      fetch(`${aplicacion}/${usuario}/${this.gasto.id}`, {
+      // metodo put para enviar o actualizar a la api a traves del id
+      fetch(`${aplicacion}/${usuario}/${this.gasto.gastoId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoGasto),
-      }).then(() => cargarGastosApi());
+      })
+        .then(() => cargarGastosApi())
+        .catch((err) => console.log("Se ha producido el error: ", err));
     });
   },
 };
@@ -484,11 +512,15 @@ document.getElementById("cargar-gastos").addEventListener("click", (evento) => {
 // Obtenemos el nombre de usuario para hacer la carga
 const aplicacion =
   "https://suhhtqjccd.execute-api.eu-west-1.amazonaws.com/latest";
-let usuario = document.getElementById("nombre_usuario").value;
-if (usuario == "") usuario = "CristinaPicazo";
+  // obtenemos el usuario
+  let usuario = document.getElementById("nombre_usuario").value;
+
 // Cargar gastos desde la aplicacion
 function cargarGastosApi() {
-  fetch(`${aplicacion}/${usuario}`)
+// obtenemos el usuario introducido
+let usuario = document.getElementById("nombre_usuario").value;
+
+fetch(`${aplicacion}/${usuario}`)
     .then((response) => response.json())
     .then((gastosAPI) => gestionPre.cargarGastos(gastosAPI))
     .then(() => repintar())
@@ -505,9 +537,9 @@ document
 // Función BorrarHandle desde la API
 let BorrarHandleAPI = {
   handleEvent: function () {
-    fetch(`${aplicacion}/${usuario}/${this.gasto.id}`, {
+    fetch(`${aplicacion}/${usuario}/${this.gasto.gastoId}`, {
       method: "DELETE",
-    }).then(() => cargarGastosApi())
+    }).then(() => cargarGastosApi());
   },
 };
 
